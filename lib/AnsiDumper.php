@@ -1,10 +1,10 @@
 <?php
+
 /**
  * Dumper Class
  *
  * @package default
  */
-
 
 class AnsiDumper {
 
@@ -12,7 +12,6 @@ class AnsiDumper {
   private $_hide = array();
   private $_paused = false;
   private $_printer = null;
-  private $_tabCache = array();
   private $_maxDepth = 5;
 
   private static $_times = array();
@@ -33,7 +32,7 @@ class AnsiDumper {
    * Constructor
    */
   public function __construct() {
-    $this->_printer = new AnsiPrint();
+    $this->_printer = new AnsiPrinter();
   }
 
 
@@ -170,17 +169,6 @@ class AnsiDumper {
     return $this;
   }
 
-  /**
-   * Use Printer cache.
-   *
-   * @param bool $flag (optional)
-   * @return AnsiDumper
-   */
-  public function usePrinterCache($flag) {
-    $this->_printer->useCache($flag);
-    return $this;
-  }
-
 
   /**
    * Stream to File
@@ -230,19 +218,6 @@ class AnsiDumper {
       $ret = "{$fn['braces'][0]}{$ret}{$fn['braces'][1]}";
     }
     return "{$typeString}{$ret}";
-  }
-
-
-  /**
-   * Get Tab String.
-   * @param int $depth
-   * @return string
-   */
-  private function _tab($depth) {
-    if (!isset($this->_tabCache[$depth])) {
-      $this->_tabCache[$depth] = $this->_printer->tab($depth);
-    }
-    return $this->_tabCache[$depth];
   }
 
 
@@ -336,10 +311,10 @@ class AnsiDumper {
     if (!in_array('arr', $this->_hide) && count($array)) {
       $res .= "\n";
       $depth++;
-      $tab = $this->_tab($depth);
+      $tab = $this->_printer->tab($depth);
       foreach ($array as $key => $value) {
         if (is_string($key)) {
-          $res .= sprintf("%s'<{red>%s<}>' => %s\n",
+          $res .= sprintf("%s\"<{red>%s<}>\" => %s\n",
                           $tab, addcslashes($key, "'"), $this->_any($value, $depth));
         } else {
           $res .= sprintf("%s<{yellow>%s<}> => %s\n",
@@ -347,7 +322,7 @@ class AnsiDumper {
         }
       }
       $depth--;
-      $res .= $this->_tab($depth);
+      $res .= $this->_printer->tab($depth);
     }
     return $res;
   }
@@ -370,14 +345,14 @@ class AnsiDumper {
     $rc = new ReflectionClass($object);
     if (($fileName = $rc->getFileName()) !== false) {
       $res .= sprintf("%sClass File: <{cyan>%s<}>\n",
-                      $this->_tab($depth), $fileName);
+                      $this->_printer->tab($depth), $fileName);
     }
 
     $methods = array_filter($rc->getMethods(), array($this, '_filterByDesiredAccessibility'));
     if (count($methods)) {
-      $res .= sprintf("%sMethods:\n", $this->_tab($depth));
+      $res .= sprintf("%sMethods:\n", $this->_printer->tab($depth));
       $depth++;
-      $tab = $this->_tab($depth);
+      $tab = $this->_printer->tab($depth);
       foreach ($methods as $method) {
         $modifierNames = Reflection::getModifierNames($method->getModifiers());
         $res .= sprintf("%s<{magenta>%s<}> <{yellow>%s<}>(%s)\n",
@@ -389,9 +364,9 @@ class AnsiDumper {
 
     $properties = array_filter($rc->getProperties(), array($this, '_filterByDesiredAccessibility'));
     if (count($properties)) {
-      $res .= sprintf("%sProperties:\n", $this->_tab($depth));
+      $res .= sprintf("%sProperties:\n", $this->_printer->tab($depth));
       $depth++;
-      $tab = $this->_tab($depth);
+      $tab = $this->_printer->tab($depth);
       foreach ($properties as $prop) {
         $modifierNames = Reflection::getModifierNames($prop->getModifiers());
         $prop->setAccessible(true);
@@ -411,9 +386,9 @@ class AnsiDumper {
             $vars[$propName] = $propValue;
           }
           if (count($vars)) {
-            $res .= sprintf("%sIterables:\n", $this->_tab($depth));
+            $res .= sprintf("%sIterables:\n", $this->_printer->tab($depth));
             $depth++;
-            $tab = $this->_tab($depth);
+            $tab = $this->_printer->tab($depth);
             foreach ($vars as $propName => $propValue) {
               $res .= sprintf("%s<{yellow>%s<}>: %s\n",
                               $tab, $propName,
@@ -423,12 +398,12 @@ class AnsiDumper {
           }
         } catch(Exception $e) {
           $res .= sprintf("%sIterables: <{red><{inverse> %s <}>\n",
-                          $this->_tab($depth), $e->getMessage());
+                          $this->_printer->tab($depth), $e->getMessage());
         }
       }
     }
     if ($res !== '') {
-      $res = "\n" . $res . $this->_tab($depth-1);
+      $res = "\n" . $res . $this->_printer->tab($depth-1);
     }
     return $res;
   }
@@ -496,6 +471,241 @@ class AnsiDumper {
    */
   private function _format_boolean_value($b) {
     return $b ? '<{yellow>true<}>' : '<{red>false<}>';
+  }
+
+}
+
+
+
+
+
+
+
+
+
+class AnsiPrinter {
+
+  private $_colors = array();
+  private $_modus = '';
+  private $_clearScreen = '';
+  private $_tab = '';
+
+  private $_cliColors = array(
+    // styles
+    'bold' => array("\033[1m", "\033[22m"),
+    'italic' => array("\033[3m", "\033[23m"),
+    'underline' => array("\033[4m", "\033[24m"),
+    'inverse' => array("\033[7m", "\033[27m"),
+    // colors
+    'black' => array("\033[30m", "\033[39m"),
+    'red' => array("\033[31m", "\033[39m"),
+    'green' => array("\033[32m", "\033[39m"),
+    'yellow' => array("\033[33m", "\033[39m"),
+    'blue' => array("\033[34m", "\033[39m"),
+    'magenta' => array("\033[35m", "\033[39m"),
+    'cyan' => array("\033[36m", "\033[39m"),
+    'white' => array("\033[37m", "\033[39m"),
+    'grey' => array("\033[90m", "\033[3m9")
+  );
+
+  private $_htmlColors = array(
+    // styles
+    'bold' => array('<span style="font-weight:bold;">', '</span>'),
+    'italic' => array('<span style="font-style:italic;">', '</span>'),
+    'underline' => array('<span style="text-decoration:underline;">', '</span>'),
+    'inverse' => array('', ''),
+    // colors
+    'black' => array('<span style="color:black;">', '</span>'),
+    'red' => array('<span style="color:red;">', '</span>'),
+    'green' => array('<span style="color:green;">', '</span>'),
+    'yellow' => array('<span style="color:yellow;">', '</span>'),
+    'blue' => array('<span style="color:blue;">', '</span>'),
+    'magenta' => array('<span style="color:magenta;">', '</span>'),
+    'cyan' => array('<span style="color:cyan;">', '</span>'),
+    'white' => array('<span style="color:white;">', '</span>'),
+    'grey' => array('<span style="color:grey;">', '</span>')
+  );
+
+  private $_plainColors = array(
+    // styles
+    'bold' => array('', ''),
+    'italic' => array('', ''),
+    'underline' => array('', ''),
+    'inverse' => array('', ''),
+    // colors
+    'black' => array('', ''),
+    'red' => array('', ''),
+    'green' => array('', ''),
+    'yellow' => array('', ''),
+    'blue' => array('', ''),
+    'magenta' => array('', ''),
+    'cyan' => array('', ''),
+    'white' => array('', ''),
+    'grey' => array('', ''),
+  );
+
+  private $_rx = null;
+
+  public function __construct() {
+    $this->enableCliModus();
+  }
+
+  public function getModus() {
+    return $this->_modus;
+  }
+
+  public function enableCliModus() {
+    $this->_colors = $this->_cliColors;
+    $this->_modus = 'cli';
+    $this->_clearScreen = "\033c";
+    $this->_tab = '  ';
+    $this->_rx = '/<(?:\{(' . implode('|', array_keys($this->_colors)) . ')|\})>/i';
+    return $this;
+  }
+
+  public function enableHtmlModus() {
+    $this->_colors = $this->_htmlColors;
+    $this->_modus = 'html';
+    $this->_clearScreen = '';
+    $this->_tab = '&nbsp;&nbsp;';
+    $this->_rx = '/<(?:\{(' . implode('|', array_keys($this->_colors)) . ')|\})>/i';
+    return $this;
+  }
+
+  public function enablePlainModus() {
+    $this->_colors = $this->_plainColors;
+    $this->_modus = 'plain';
+    $this->_clearScreen = '';
+    $this->_tab = '  ';
+    $this->_rx = '/<(?:\{(' . implode('|', array_keys($this->_colors)) . ')|\})>/i';
+    return $this;
+  }
+
+  public function clearScreen() {
+    return $this->_clearScreen;
+  }
+
+  public function colorize($format) {
+    if (func_num_args() > 1) {
+      $format = vsprintf($format, array_slice(func_get_args(), 1));
+    }
+
+    $res = '';
+    $offset = 0;
+    $history = array();
+    while (preg_match($this->_rx, $format, $m, PREG_OFFSET_CAPTURE, $offset)) {
+      $res .= substr($format, $offset, $m[0][1] - $offset);
+      if (isset($m[1])) {
+        // Opening tag found. Append the starting escape string sequence.
+        $esc = $this->_colors[$m[1][0]];
+        $history[] = $esc;
+        $res .= $esc[0];
+      } else if (count($history)) {
+        // Closing tag found. Append the closing escape string sequence of the current color.
+        $esc = array_pop($history);
+        $res .= $esc[1];
+        if (count($history) && $this->_modus === 'cli') {
+          // Continue with previous starting escape string sequence.
+          $res .= $history[ count($history) - 1][0];
+        }
+      }
+      $offset = $m[0][1] + strlen($m[0][0]);
+    }
+    $res .= substr($format, $offset);
+    while (count($history)) {
+      // Close all remaining tags.
+      $esc = array_pop($history);
+      $res .= $esc[1];
+    }
+
+    if ($this->_modus === 'html') {
+      $res = str_replace("\n", "<br>\n", $res);
+    }
+    return $res;
+  }
+
+  public function tab($depth) {
+    return str_repeat($this->_tab, $depth);
+  }
+
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Standard Dumper (used to write colorized dumps to STDOUT).
+ */
+class SD {
+
+  public static function getInstance() {
+    $instance = new AnsiDumper();
+    return $instance->hide('obj.private,obj.protected')
+                    ->setMaxDepth(10)
+                    ->streamTo(STDOUT)
+                    ;
+  }
+
+  public static function __callStatic($name, $arguments) {
+    return call_user_func_array(array(self::getInstance(), $name), $arguments);
+  }
+
+}
+
+
+
+
+
+
+
+
+
+/**
+ * File Dumper. Can be used to write colorized dumps to a file using the FD_STEAM file descriptor.
+ */
+class FD {
+
+  public static function getInstance() {
+    $instance = new AnsiDumper();
+    return $instance->hide('obj.private,obj.protected')
+                    ->setMaxDepth(10)
+                    ->streamTo(FD_STREAM);
+  }
+
+  public static function __callStatic($name, $arguments) {
+    return call_user_func_array(array(self::getInstance(), $name), $arguments);
+  }
+
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Plain Dumper. Can be used to dump data without any ANSI/HTML colors using the PD_STREAM file descriptor.
+ */
+class PD {
+
+  public static function getInstance() {
+    $instance = new AnsiDumper();
+    return $instance->hide('obj.private,obj.protected')
+                    ->setMaxDepth(10)
+                    ->enablePlainModus()
+                    ->streamTo(PD_STREAM);
+  }
+
+  public static function __callStatic($name, $arguments) {
+    return call_user_func_array(array(self::getInstance(), $name), $arguments);
   }
 
 }
