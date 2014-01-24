@@ -1,8 +1,7 @@
 <?php
 
-require('lib/AnsiDumper.php');
+require('lib/FD.php');
+#define('FD_FILE', '/tmp/fd.dump');
+$_SERVER['FD_FILE'] = '/tmp/fd.dump';
 
-define('PD_STREAM', fopen('/tmp/pd.log', 'a+'));
-
-PD::val('abc');
-PD::val($_SERVER);
+FD::clearScreen()->val($_SERVER)->val(microtime(true));
