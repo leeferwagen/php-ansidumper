@@ -9,61 +9,6 @@ class AnsiPrinter {
   private $_modus = '';
   private $_clearScreen = '';
   private $_tab = '';
-
-  private $_cliColors = array(
-    // styles
-    'bold' => array("\033[1m", "\033[22m"),
-    'italic' => array("\033[3m", "\033[23m"),
-    'underline' => array("\033[4m", "\033[24m"),
-    'inverse' => array("\033[7m", "\033[27m"),
-    // colors
-    'black' => array("\033[30m", "\033[39m"),
-    'red' => array("\033[31m", "\033[39m"),
-    'green' => array("\033[32m", "\033[39m"),
-    'yellow' => array("\033[33m", "\033[39m"),
-    'blue' => array("\033[34m", "\033[39m"),
-    'magenta' => array("\033[35m", "\033[39m"),
-    'cyan' => array("\033[36m", "\033[39m"),
-    'white' => array("\033[37m", "\033[39m"),
-    'grey' => array("\033[90m", "\033[3m9")
-  );
-
-  private $_htmlColors = array(
-    // styles
-    'bold' => array('<span style="font-weight:bold;">', '</span>'),
-    'italic' => array('<span style="font-style:italic;">', '</span>'),
-    'underline' => array('<span style="text-decoration:underline;">', '</span>'),
-    'inverse' => array('', ''),
-    // colors
-    'black' => array('<span style="color:black;">', '</span>'),
-    'red' => array('<span style="color:red;">', '</span>'),
-    'green' => array('<span style="color:green;">', '</span>'),
-    'yellow' => array('<span style="color:yellow;">', '</span>'),
-    'blue' => array('<span style="color:blue;">', '</span>'),
-    'magenta' => array('<span style="color:magenta;">', '</span>'),
-    'cyan' => array('<span style="color:cyan;">', '</span>'),
-    'white' => array('<span style="color:white;">', '</span>'),
-    'grey' => array('<span style="color:grey;">', '</span>')
-  );
-
-  private $_plainColors = array(
-    // styles
-    'bold' => array('', ''),
-    'italic' => array('', ''),
-    'underline' => array('', ''),
-    'inverse' => array('', ''),
-    // colors
-    'black' => array('', ''),
-    'red' => array('', ''),
-    'green' => array('', ''),
-    'yellow' => array('', ''),
-    'blue' => array('', ''),
-    'magenta' => array('', ''),
-    'cyan' => array('', ''),
-    'white' => array('', ''),
-    'grey' => array('', ''),
-  );
-
   private $_rx = null;
 
   public function __construct() {
@@ -83,9 +28,25 @@ class AnsiPrinter {
    * @return AnsiPrinter
    */
   public function enableCliModus() {
-    $this->_colors = $this->_cliColors;
+    $this->_colors = array(
+      // styles
+      'bold' => array("\033[1m", "\033[22m"),
+      'italic' => array("\033[3m", "\033[23m"),
+      'underline' => array("\033[4m", "\033[24m"),
+      'inverse' => array("\033[7m", "\033[27m"),
+      // colors
+      'black' => array("\033[30m", "\033[39m"),
+      'red' => array("\033[31m", "\033[39m"),
+      'green' => array("\033[32m", "\033[39m"),
+      'yellow' => array("\033[33m", "\033[39m"),
+      'blue' => array("\033[34m", "\033[39m"),
+      'magenta' => array("\033[35m", "\033[39m"),
+      'cyan' => array("\033[36m", "\033[39m"),
+      'white' => array("\033[37m", "\033[39m"),
+      'grey' => array("\033[90m", "\033[3m9")
+    );
     $this->_modus = 'cli';
-    $this->_clearScreen = "\033c";
+    $this->_clearScreen = "\033c\033[2J";
     $this->_tab = '  ';
     $this->_rx = '/<(?:\{(' . implode('|', array_keys($this->_colors)) . ')|\})>/i';
     return $this;
@@ -96,7 +57,23 @@ class AnsiPrinter {
    * @return AnsiPrinter
    */
   public function enableHtmlModus() {
-    $this->_colors = $this->_htmlColors;
+    $this->_colors = array(
+      // styles
+      'bold' => array('<span style="font-weight:bold;">', '</span>'),
+      'italic' => array('<span style="font-style:italic;">', '</span>'),
+      'underline' => array('<span style="text-decoration:underline;">', '</span>'),
+      'inverse' => array('', ''),
+      // colors
+      'black' => array('<span style="color:black;">', '</span>'),
+      'red' => array('<span style="color:red;">', '</span>'),
+      'green' => array('<span style="color:green;">', '</span>'),
+      'yellow' => array('<span style="color:yellow;">', '</span>'),
+      'blue' => array('<span style="color:blue;">', '</span>'),
+      'magenta' => array('<span style="color:magenta;">', '</span>'),
+      'cyan' => array('<span style="color:cyan;">', '</span>'),
+      'white' => array('<span style="color:white;">', '</span>'),
+      'grey' => array('<span style="color:grey;">', '</span>')
+    );
     $this->_modus = 'html';
     $this->_clearScreen = '';
     $this->_tab = '&nbsp;&nbsp;';
@@ -109,7 +86,23 @@ class AnsiPrinter {
    * @return AnsiPrinter
    */
   public function enablePlainModus() {
-    $this->_colors = $this->_plainColors;
+    $this->_colors = array(
+      // styles
+      'bold' => array('', ''),
+      'italic' => array('', ''),
+      'underline' => array('', ''),
+      'inverse' => array('', ''),
+      // colors
+      'black' => array('', ''),
+      'red' => array('', ''),
+      'green' => array('', ''),
+      'yellow' => array('', ''),
+      'blue' => array('', ''),
+      'magenta' => array('', ''),
+      'cyan' => array('', ''),
+      'white' => array('', ''),
+      'grey' => array('', ''),
+    );
     $this->_modus = 'plain';
     $this->_clearScreen = '';
     $this->_tab = '  ';
