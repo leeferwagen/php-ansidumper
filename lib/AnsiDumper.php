@@ -73,26 +73,6 @@ class AnsiDumper {
 
 
   /**
-   * Start measurement of time and return a callback function to stop
-   * the measurement and write to it to the stream.
-   *
-   * @param string $description
-   * @return callable
-   */
-  public function metime($description) {
-    $start = microtime(true);
-    return function() use($start, $description) {
-      $diff = microtime(true) - $start;
-      if ($this->_paused === false) {
-        $description = sprintf($description, $diff);
-        $description = preg_replace('/([\d\.]+)/', '<{cyan>$1<}>', $description);
-        $this->_prepareDumpAndWrite('<{green> » <{yellow>' . $description . '<}><}>');
-      }
-    };
-  }
-
-
-  /**
    * Pass an array or a comma-seperated string of unwanted stuff.
    * Valid "stuff" is:
    *   obj            hide objects
@@ -108,7 +88,7 @@ class AnsiDumper {
    */
   public function hide($keys) {
     if (is_string($keys)) {
-      $keys = explode(',', $keys);
+      $keys = array_map('trim', explode(',', $keys));
     }
     $this->_hide = array_merge($this->_hide, $keys);
     return $this;
