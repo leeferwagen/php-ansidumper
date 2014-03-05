@@ -83,7 +83,7 @@ class AnsiDumper {
     }
     $mt = explode('.', (string)microtime(true));
     $ts = date('Y-m-d H:i:s', (int)$mt[0]) . '.' . substr(str_pad($mt[1], 3, '0'), 0, 3);
-    return $this->_prepareDumpAndWrite('<{green><{purple>[' . $ts . ']<}> ' . $this->_any($value, 0) . '<}>');
+    return $this->_prepareDumpAndWrite('<{green><{magenta>[' . $ts . ']<}> ' . $this->_any($value, 0) . '<}>');
   }
 
   /**
