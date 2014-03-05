@@ -70,7 +70,21 @@ class AnsiDumper {
     }
     return $this->_prepareDumpAndWrite('<{green>' . $this->_any($value, 0) . '<}>');
   }
-
+  
+  /**
+   * Dump a mixed value with additionally prepended time.
+   * 
+   * @param mixed $value
+   * @return AnsiDumper
+   */
+  public function tval($value) {
+    if ($this->_paused || !is_resource($this->_stream)) {
+      return $this;
+    }
+    $mt = explode('.', (string)microtime(true));
+    $ts = date('Y-m-d H:i:s', (int)$mt[0]) . '.' . substr(str_pad($mt[1], 3, '0'), 0, 3);
+    return $this->_prepareDumpAndWrite('<{green><{purple>[' . $ts . ']<}> ' . $this->_any($value, 0) . '<}>');
+  }
 
   /**
    * Pass an array or a comma-seperated string of unwanted stuff.
