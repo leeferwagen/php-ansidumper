@@ -46,7 +46,7 @@ class AnsiPrinter {
       'grey' => array("\033[90m", "\033[3m9")
     );
     $this->_modus = 'cli';
-    $this->_clearScreen = "\033c\033[2J";
+    $this->_clearScreen = "\033c\033[3J";
     $this->_tab = '  ';
     $this->_rx = '/<(?:\{(' . implode('|', array_keys($this->_colors)) . ')|\})>/i';
     return $this;
