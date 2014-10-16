@@ -18,6 +18,7 @@ class AnsiDumper {
   private $_paused = false;
   private $_printer = null;
   private $_maxDepth = 5;
+  private $_scope = '';
 
   private $_fnmap = array(
     'NULL'     => array('print_type' => false, 'method' => '_format_null_value'),
@@ -68,7 +69,12 @@ class AnsiDumper {
     if ($this->_paused || !is_resource($this->_stream)) {
       return $this;
     }
-    return $this->_prepareDumpAndWrite('<{green>' . $this->_any($value, 0) . '<}>');
+    $prefix = '<{green>';
+    if (strlen($this->_scope)) {
+      $prefix .= $this->_scope;
+    }
+    $suffix = '<}>';
+    return $this->_prepareDumpAndWrite($prefix . $this->_any($value, 0) . $suffix);
   }
   
   /**
@@ -83,7 +89,12 @@ class AnsiDumper {
     }
     $mt = explode('.', (string)microtime(true));
     $ts = date('Y-m-d H:i:s', (int)$mt[0]) . '.' . substr(str_pad($mt[1], 3, '0'), 0, 3);
-    return $this->_prepareDumpAndWrite('<{green><{magenta>[' . $ts . ']<}> ' . $this->_any($value, 0) . '<}>');
+    $prefix = '<{green><{magenta>[' . $ts . ']<}>';
+    if (strlen($this->_scope)) {
+      $prefix .= $this->_scope;
+    }
+    $suffix = '<}>';
+    return $this->_prepareDumpAndWrite($prefix . $this->_any($value, 0) . $suffix);
   }
 
   /**
@@ -165,6 +176,17 @@ class AnsiDumper {
   public function setMaxDepth($maxDepth) {
     $this->_maxDepth = abs((int)$maxDepth);
     return $this;
+  }
+
+
+  /**
+   * Set scope name, which is used as prefix in val() and tval()
+   *
+   * @param string $scope
+   * @return AnsiDumper
+   */
+  public function setScope($scope) {
+    $scope = trim((string)$scope);
   }
 
 

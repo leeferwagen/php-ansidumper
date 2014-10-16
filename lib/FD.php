@@ -31,6 +31,11 @@ class FD {
   private static $_instance = null;
 
   /**
+   * @var string $_scope
+   */
+  private static $_scope = null;
+
+  /**
    * Return the singleton instance of AnsiDumper.
    * @return AnsiDumper
    */
@@ -44,9 +49,18 @@ class FD {
         }
       }
 
+      if (self::$_scope === null) {
+        if (defined('FD_SCOPE')) {
+          self::$_scope = trim(FD_SCOPE);
+        } elseif (isset($_SERVER['FD_SCOPE'])) {
+          self::$_scope = trim($_SERVER['FD_SCOPE']);
+        }
+      }
+
       self::$_instance = new AnsiDumper();
       self::$_instance->hide('obj.private,obj.protected')
                       ->setMaxDepth(10)
+                      ->setScope(self::$_scope)
                       ->streamTo(self::$_stream);
     }
     return self::$_instance;
