@@ -89,10 +89,11 @@ class AnsiDumper {
     }
     $mt = explode('.', (string)microtime(true));
     $ts = date('Y-m-d H:i:s', (int)$mt[0]) . '.' . substr(str_pad($mt[1], 3, '0'), 0, 3);
-    $prefix = '<{green><{magenta>[' . $ts . ']<}>';
+    $prefix = '<{green>';
     if (strlen($this->_scope)) {
       $prefix .= $this->_scope;
     }
+    $prefix .= '<{magenta>[' . $ts . ']<}>';
     $suffix = '<}>';
     return $this->_prepareDumpAndWrite($prefix . $this->_any($value, 0) . $suffix);
   }
@@ -186,7 +187,7 @@ class AnsiDumper {
    * @return AnsiDumper
    */
   public function setScope($scope) {
-    $scope = trim((string)$scope);
+    $this->_scope = (string)$scope;
     return $this;
   }
 
