@@ -187,6 +187,7 @@ class AnsiDumper {
    */
   public function setScope($scope) {
     $scope = trim((string)$scope);
+    return $this;
   }
 
 
