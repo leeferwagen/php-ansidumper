@@ -51,9 +51,9 @@ class FD {
 
       if (self::$_scope === null) {
         if (defined('FD_SCOPE')) {
-          self::$_scope = trim(FD_SCOPE);
+          self::$_scope = FD_SCOPE;
         } elseif (isset($_SERVER['FD_SCOPE'])) {
-          self::$_scope = trim($_SERVER['FD_SCOPE']);
+          self::$_scope = $_SERVER['FD_SCOPE'];
         }
       }
 
