@@ -17,6 +17,19 @@ require_once(dirname(__FILE__) . '/AnsiDumper.php');
  * @method static AnsiDumper clearScreen() Clear Screen (only supported in CLI modus)
  * @method static AnsiDumper setMaxDepth(int $maxDepth) Set maximum depth in Arrays, Objects, Iterables, etc.
  * @method static AnsiDumper streamTo(resource $stream) Stream to File
+ *
+ * @static
+ * @method AnsiDumper pause() Pause the output
+ * @method AnsiDumper resume() Resume the output
+ * @method AnsiDumper val(mixed $value) Dump a mixed value
+ * @method AnsiDumper tval(mixed $value) Dump a mixed value with prepending time
+ * @method AnsiDumper hide(string|array $keys) Pass an array or a comma-seperated string of unwanted stuff
+ * @method AnsiDumper enableCliModus() Enable colorized CLI dumps (no HTML-Tags)
+ * @method AnsiDumper enableHtmlModus() Enable HTML dumps
+ * @method AnsiDumper enablePlainModus() Enable Plain Text dumps
+ * @method AnsiDumper clearScreen() Clear Screen (only supported in CLI modus)
+ * @method AnsiDumper setMaxDepth(int $maxDepth) Set maximum depth in Arrays, Objects, Iterables, etc.
+ * @method AnsiDumper streamTo(resource $stream) Stream to File
  */
 class FD {
 
