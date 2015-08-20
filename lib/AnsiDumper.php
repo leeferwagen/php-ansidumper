@@ -19,6 +19,7 @@ class AnsiDumper {
   private $_printer = null;
   private $_maxDepth = 5;
   private $_scope = '';
+  private $_times = array();
 
   private $_fnmap = array(
     'NULL'     => array('print_type' => false, 'method' => '_format_null_value'),
@@ -76,10 +77,10 @@ class AnsiDumper {
     $suffix = '<}>';
     return $this->_prepareDumpAndWrite($prefix . $this->_any($value, 0) . $suffix);
   }
-  
+
   /**
    * Dump a mixed value with additionally prepended time.
-   * 
+   *
    * @param mixed $value
    * @return AnsiDumper
    */
@@ -96,6 +97,62 @@ class AnsiDumper {
     $prefix .= '<{magenta>[' . $ts . ']<}>';
     $suffix = '<}>';
     return $this->_prepareDumpAndWrite($prefix . $this->_any($value, 0) . $suffix);
+  }
+
+  /**
+   * Starts a timer you can use to track how long an operation takes.
+   * You give each timer a unique name. The callback parameter is optional.
+   *
+   * @param string $name
+   * @param callable $cb
+   * @return mixed The return value of the given callback, if given or null
+   */
+  public function time($name, $cb = null) {
+  	if ($this->_paused || !is_resource($this->_stream)) {
+      return $this;
+    }
+  	if ($cb) {
+  		$startTime = microtime(true);
+  		$cbReturn = call_user_func($cb);
+  		$stopTime = microtime(true);
+  		$this->_time($name, $startTime, $stopTime);
+  		return $cbReturn;
+  	} else {
+  		$this->_times[$name] = microtime(true);
+  		return $this;
+  	}
+  }
+
+  /**
+   * Stop a timer that was previously started by calling time().
+   *
+   * @param string $name
+   * @return AnsiDumper
+   */
+  public function timeEnd($name) {
+  	if (isset($this->_times[$name])) {
+  		$startTime = $this->_times[$name];
+  		$stopTime = microtime(true);
+  		unset($this->_times[$name]);
+  		$this->_time($name, $startTime, $stopTime);
+  	}
+  	return $this;
+  }
+
+  private function _time($name, $startTime, $stopTime) {
+    $prefix = '<{green>';
+    if (strlen($this->_scope)) {
+      $prefix .= $this->_scope;
+    }
+
+    $diff = sprintf('%0.9f', $stopTime - $startTime);
+    $diff = explode('.', $diff, 2);
+    $diff[1] = implode(',', str_split($diff[1], 3));
+    $diff = implode('.', $diff);
+
+    $prefix .= sprintf('[<{yellow>%ss<}>] %s', $diff, $name);
+    $suffix = '<}>';
+    return $this->_prepareDumpAndWrite($prefix . $suffix);
   }
 
   /**
