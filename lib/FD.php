@@ -1,7 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) . '/AnsiDumper.php');
-
+namespace AnsiDumper;
 
 /**
  * File Dumper. Can be used to write colorized dumps to a file using the FD_STEAM file descriptor.
@@ -31,56 +30,59 @@ require_once(dirname(__FILE__) . '/AnsiDumper.php');
  * @method AnsiDumper setMaxDepth(int $maxDepth) Set maximum depth in Arrays, Objects, Iterables, etc.
  * @method AnsiDumper streamTo(resource $stream) Stream to File
  */
-class FD {
+class FD
+{
 
-  /**
-   * @var resource $_stream
-   */
-  private static $_stream = null;
+    /**
+     * @var resource $_stream
+     */
+    private static $_stream = null;
 
-  /**
-   * @var FD $_instance
-   */
-  private static $_instance = null;
+    /**
+     * @var FD $_instance
+     */
+    private static $_instance = null;
 
-  /**
-   * @var string $_scope
-   */
-  private static $_scope = null;
+    /**
+     * @var string $_scope
+     */
+    private static $_scope = null;
 
-  /**
-   * Return the singleton instance of AnsiDumper.
-   * @return AnsiDumper
-   */
-  public static function getInstance() {
-    if (self::$_instance === null) {
-      if (self::$_stream === null) {
-        if (defined('FD_FILE')) {
-          self::$_stream = fopen(FD_FILE, 'a+');
-        } elseif (isset($_SERVER['FD_FILE'])) {
-          self::$_stream = fopen($_SERVER['FD_FILE'], 'a+');
+    /**
+     * Return the singleton instance of AnsiDumper.
+     * @return AnsiDumper
+     */
+    public static function getInstance()
+    {
+        if (self::$_instance === null) {
+            if (self::$_stream === null) {
+                if (defined('FD_FILE')) {
+                    self::$_stream = fopen(FD_FILE, 'a+');
+                } elseif (isset($_SERVER['FD_FILE'])) {
+                    self::$_stream = fopen($_SERVER['FD_FILE'], 'a+');
+                }
+            }
+
+            if (self::$_scope === null) {
+                if (defined('FD_SCOPE')) {
+                    self::$_scope = FD_SCOPE;
+                } elseif (isset($_SERVER['FD_SCOPE'])) {
+                    self::$_scope = $_SERVER['FD_SCOPE'];
+                }
+            }
+
+            self::$_instance = new AnsiDumper();
+            self::$_instance->hide('obj.private,obj.protected')
+                ->setMaxDepth(10)
+                ->setScope(self::$_scope)
+                ->streamTo(self::$_stream);
         }
-      }
-
-      if (self::$_scope === null) {
-        if (defined('FD_SCOPE')) {
-          self::$_scope = FD_SCOPE;
-        } elseif (isset($_SERVER['FD_SCOPE'])) {
-          self::$_scope = $_SERVER['FD_SCOPE'];
-        }
-      }
-
-      self::$_instance = new AnsiDumper();
-      self::$_instance->hide('obj.private,obj.protected')
-                      ->setMaxDepth(10)
-                      ->setScope(self::$_scope)
-                      ->streamTo(self::$_stream);
+        return self::$_instance;
     }
-    return self::$_instance;
-  }
 
-  public static function __callStatic($name, $arguments) {
-    return call_user_func_array(array(self::getInstance(), $name), $arguments);
-  }
+    public static function __callStatic($name, $arguments)
+    {
+        return call_user_func_array(array(self::getInstance(), $name), $arguments);
+    }
 
 }
