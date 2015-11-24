@@ -1,0 +1,33 @@
+{
+  "name": "ansidumper/ansidumper",
+  "description": "oloured data dumper for PHP, similar to print_r() or var_dump().",
+  "version": "0.0.1",
+  "keywords": ["dump", "ansi"],
+  "type": "library",
+  "homepage": "http://github.com/Muslim-Idris/php-ansidumper",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Muslim Idris",
+      "email": "gelamu@gmail.com"
+    },
+    {
+      "name": "Jan Oetjen",
+      "email": "oetjenj@gmail.com"
+    }
+  ],
+  "support": {
+    "issues": "http://github.com/Muslim-Idris/php-ansidumper/issues"
+  },
+  "autoload": {
+    "psr-4": {
+      "AnsiDumper\\": "lib/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AnsiDumper\\Tests\\": "tests/"
+    }
+  }
+}

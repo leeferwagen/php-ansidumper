@@ -1,7 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) . '/AnsiDumper.php');
-
+namespace AnsiDumper;
 
 /**
  * Standard Dumper (used to write colorized dumps to STDOUT).
@@ -18,22 +17,24 @@ require_once(dirname(__FILE__) . '/AnsiDumper.php');
  * @method static AnsiDumper setMaxDepth(int $maxDepth) Set maximum depth in Arrays, Objects, Iterables, etc.
  * @method static AnsiDumper streamTo(resource $stream) Stream to File
  */
-class SD {
+class SD
+{
 
-  /**
-   * Singleton of AnsiDumper.
-   * @return AnsiDumper
-   */
-  public static function getInstance() {
-    $instance = new AnsiDumper();
-    return $instance->hide('obj.private,obj.protected')
-                    ->setMaxDepth(10)
-                    ->streamTo(STDOUT)
-                    ;
-  }
+    /**
+     * Singleton of AnsiDumper.
+     * @return AnsiDumper
+     */
+    public static function getInstance()
+    {
+        $instance = new AnsiDumper();
+        return $instance->hide('obj.private,obj.protected')
+            ->setMaxDepth(10)
+            ->streamTo(STDOUT);
+    }
 
-  public static function __callStatic($name, $arguments) {
-    return call_user_func_array(array(self::getInstance(), $name), $arguments);
-  }
+    public static function __callStatic($name, $arguments)
+    {
+        return call_user_func_array(array(self::getInstance(), $name), $arguments);
+    }
 
 }
