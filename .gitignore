@@ -1,4 +1,4 @@
-
+*.dump
 
 ### Composer template
 composer.phar
